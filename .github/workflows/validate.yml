@@ -1,0 +1,45 @@
+name: Validate
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  userscript:
+    name: Userscript checks
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Check JavaScript syntax
+        run: node --check TAS.js
+
+      - name: Validate userscript metadata
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q '^// ==UserScript==$' TAS.js
+          grep -q '^// ==/UserScript==$' TAS.js
+          grep -q '^// @name ' TAS.js
+          grep -q '^// @version ' TAS.js
+          grep -q '^// @match ' TAS.js
+          grep -q '^// @run-at ' TAS.js
+
+      - name: Check whitespace
+        shell: bash
+        run: |
+          set -euo pipefail
+          if grep -n $'\r' TAS.js README.md CONTRIBUTING.md SECURITY.md; then
+            echo 'CRLF characters found.'
+            exit 1
+          fi
