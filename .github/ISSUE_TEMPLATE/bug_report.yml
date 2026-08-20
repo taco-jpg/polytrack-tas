@@ -1,0 +1,57 @@
+name: Bug report
+description: Report reproducible incorrect behavior in PolyTrack TAS
+title: "[Bug]: "
+labels: []
+body:
+  - type: markdown
+    attributes:
+      value: Thanks for taking the time to report a problem.
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: What happened, and what did you expect to happen?
+      placeholder: Describe the problem clearly.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce
+      description: Provide the smallest reliable reproduction you can.
+      placeholder: |
+        1. Open PolyTrack...
+        2. Set TAS speed to...
+        3. Press...
+        4. Observe...
+    validations:
+      required: true
+  - type: input
+    id: browser
+    attributes:
+      label: Browser
+      placeholder: e.g. Chrome 151
+    validations:
+      required: true
+  - type: input
+    id: manager
+    attributes:
+      label: Userscript manager
+      placeholder: e.g. Tampermonkey 5.x
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Console output
+      description: Paste relevant errors or logs. Remove private information first.
+      render: shell
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checklist
+      options:
+        - label: I tested with the latest version of TAS.js from this repository.
+          required: true
+        - label: I searched existing issues for the same problem.
+          required: true
