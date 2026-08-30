@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         PolyTrack TAS Slow-Motion Controller
 // @namespace    https://www.kodub.com/
-// @version      1.0.0
+// @version      1.0.1
 // @description  TAS-style slow motion, pause, and frame-step controls for PolyTrack. Press P to show/hide.
 // @match        https://app-polytrack.kodub.com/*
 // @run-at       document-start
@@ -125,6 +125,46 @@
         const patch = `
 const __TAS_FLAG = ${JSON.stringify(CONTROL_FLAG)};
 
+const __originalURL =
+    ${JSON.stringify(originalURL)};
+
+const __baseURL =
+    new URL(".", __originalURL).href;
+
+const __resolveURL = value =>
+    new URL(String(value), __baseURL).href;
+
+// Blob workers cannot resolve relative fetch/XHR URLs against their
+// original script. Keep PolyTrack's resource requests on the real origin.
+const __nativeFetch = self.fetch.bind(self);
+
+self.fetch = (input, init) => {
+    if (
+        typeof input === "string" ||
+        input instanceof URL
+    ) {
+        input = __resolveURL(input);
+    }
+
+    return __nativeFetch(input, init);
+};
+
+const __nativeXHROpen =
+    XMLHttpRequest.prototype.open;
+
+XMLHttpRequest.prototype.open = function (
+    method,
+    url,
+    ...args
+) {
+    return __nativeXHROpen.call(
+        this,
+        method,
+        __resolveURL(url),
+        ...args
+    );
+};
+
 const __realNow = performance.now.bind(performance);
 
 let __speed = ${JSON.stringify(initialSpeed)};
@@ -223,16 +263,10 @@ ${patch}
 const __nativeImportScripts =
     self.importScripts.bind(self);
 
-const __originalURL =
-    ${JSON.stringify(originalURL)};
-
-const __baseURL =
-    new URL(".", __originalURL).href;
-
 self.importScripts = (...urls) => {
     return __nativeImportScripts(
         ...urls.map(url =>
-            new URL(String(url), __baseURL).href
+            __resolveURL(url)
         )
     );
 };
